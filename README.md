@@ -1,6 +1,6 @@
-# 🩺 AI Medical Assistant Chatbot (RAG-based Application)
+# RAG-Based AI Chat Assistant 
 
-An advanced, production-ready **Medical Domain Chatbot** built using **Retrieval-Augmented Generation (RAG)**. This application allows users to upload medical documents (e.g., PDFs, reports, textbooks) which are dynamically chunked, embedded, and indexed into a vector database. Users can then converse with **MediBot**, an AI medical assistant that retrieves relevant context from the uploaded documents to answer medical queries accurately and minimize hallucinations.
+An advanced, production-ready **AI Chatbot** built using **Retrieval-Augmented Generation (RAG)**. This application allows users to upload medical documents (e.g., PDFs, reports, textbooks) which are dynamically chunked, embedded, and indexed into a vector database. Users can then converse with **MediBot**, an AI medical assistant that retrieves relevant context from the uploaded documents to answer medical queries accurately and minimize hallucinations.
 
 ---
 

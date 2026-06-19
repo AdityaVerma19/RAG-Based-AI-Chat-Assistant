@@ -3,7 +3,7 @@ from utils.api import upload_pdfs_api
 
 
 def render_uploader():
-    st.sidebar.header("Upload Medical documents (.PDFs)")
+    st.sidebar.header("Upload Relevent documents (.PDFs)")
     uploaded_files=st.sidebar.file_uploader("Upload multiple PDFs",type="pdf",accept_multiple_files=True)
     if st.sidebar.button("Upload DB") and uploaded_files:
         response=upload_pdfs_api(uploaded_files)
