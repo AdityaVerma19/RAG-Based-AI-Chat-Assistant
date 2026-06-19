@@ -8,49 +8,6 @@ An advanced, production-ready **AI Chatbot** built using **Retrieval-Augmented G
 
 ![Flowchart](assets/flowchart.png)
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as User / Client UI
-    participant Client as Streamlit Client
-    participant Server as FastAPI Server
-    participant Google as Google GenAI Embeddings
-    participant Pinecone as Pinecone Vector DB
-    participant Groq as Groq (Llama 3.3)
-
-    %% Upload Flow
-    rect rgb(240, 248, 255)
-        Note over User, Pinecone: Document Ingestion & Indexing Pipeline
-        User->>Client: Upload medical PDF(s) & click "Upload DB"
-        Client->>Server: POST /upload_pdfs/ (file upload)
-        Server->>Server: Save PDFs to local uploaded_docs/
-        Server->>Server: PyPDFLoader loads & parses PDF content
-        Server->>Server: RecursiveCharacterTextSplitter splits text into chunks
-        Server->>Google: Embed texts (models/gemini-embedding-001)
-        Google-->>Server: Return 3072D embeddings (truncated to 768D)
-        Server->>Pinecone: Upsert vectors (ID, Embedding, Metadata with chunk text)
-        Pinecone-->>Server: Confirm Upsert
-        Server-->>Client: 200 OK (Upload Successful)
-        Client-->>User: Show success message in Sidebar
-    end
-
-    %% Query Flow
-    rect rgb(255, 245, 238)
-        Note over User, Groq: Retrieval-Augmented Generation (RAG) Query Pipeline
-        User->>Client: Submit medical query
-        Client->>Server: POST /ask/ (question)
-        Server->>Google: Embed query (models/gemini-embedding-001)
-        Google-->>Server: Return 768D query embedding
-        Server->>Pinecone: Query index for top_k=3 matching vectors
-        Pinecone-->>Server: Return matches (metadata + chunk texts)
-        Server->>Server: Build SimpleRetriever using matches
-        Server->>Server: Instantiate QA Chain (RetrievalQA + MediBot Prompt)
-        Server->>Groq: Generate answer using retrieved context + query
-        Groq-->>Server: Return generated medical response
-        Server-->>Client: 200 OK (JSON with response & sources)
-        Client-->>User: Display MediBot answer & download option
-    end
-```
 
 ---
 
