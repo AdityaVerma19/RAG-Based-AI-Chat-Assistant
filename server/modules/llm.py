@@ -1,17 +1,20 @@
-from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
+from langchain_core.prompts import PromptTemplate
+from langchain_classic.chains import RetrievalQA
 from langchain_groq import ChatGroq
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+server_dir = Path(__file__).resolve().parent.parent
+env_path = server_dir / ".env"
+load_dotenv(dotenv_path=env_path)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 def get_llm_chain(retriever):
     llm = ChatGroq(
         groq_api_key=GROQ_API_KEY,
-        model_name="llama3-70b-8192"
+        model_name="llama-3.3-70b-versatile"
     )
 
     prompt = PromptTemplate(

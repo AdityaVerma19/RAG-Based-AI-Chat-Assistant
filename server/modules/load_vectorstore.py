@@ -5,17 +5,26 @@ from dotenv import load_dotenv
 from tqdm.auto import tqdm
 from pinecone import Pinecone, ServerlessSpec
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-load_dotenv()
+# Try to find and load .env explicitly from the server folder to prevent CWD issues
+server_dir = Path(__file__).resolve().parent.parent
+env_path = server_dir / ".env"
+print(f"🔍 Loading .env from: {env_path} (exists: {env_path.exists()})")
+load_dotenv(dotenv_path=env_path)
 
 GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
 PINECONE_API_KEY=os.getenv("PINECONE_API_KEY")
 PINECONE_ENV="us-east-1"
-PINECONE_INDEX_NAME="medicalindex"
+PINECONE_INDEX_NAME=os.getenv("PINECONE_INDEX_NAME", "medicalindex")
 
-os.environ["GOOGLE_API_KEY"]=GOOGLE_API_KEY
+if GOOGLE_API_KEY:
+    print(f"🔑 Loaded GOOGLE_API_KEY: {GOOGLE_API_KEY[:5]}...{GOOGLE_API_KEY[-5:] if len(GOOGLE_API_KEY) > 5 else ''}")
+else:
+    print("⚠️ GOOGLE_API_KEY is NOT set in environment or .env!")
+
+os.environ["GOOGLE_API_KEY"]=GOOGLE_API_KEY or ""
 
 UPLOAD_DIR="./uploaded_docs"
 os.makedirs(UPLOAD_DIR,exist_ok=True)
@@ -43,7 +52,12 @@ index=pc.Index(PINECONE_INDEX_NAME)
 # load,split,embed and upsert pdf docs content
 
 def load_vectorstore(uploaded_files):
-    embed_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    print(f"[DEBUG] load_vectorstore - GOOGLE_API_KEY: {GOOGLE_API_KEY[:8] if GOOGLE_API_KEY else 'None'}...")
+    embed_model = GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        google_api_key=GOOGLE_API_KEY,
+        output_dimensionality=768
+    )
     file_paths = []
 
     for file in uploaded_files:
@@ -58,6 +72,9 @@ def load_vectorstore(uploaded_files):
 
         splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         chunks = splitter.split_documents(documents)
+
+        for chunk in chunks:
+            chunk.metadata["text"] = chunk.page_content
 
         texts = [chunk.page_content for chunk in chunks]
         metadatas = [chunk.metadata for chunk in chunks]
